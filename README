@@ -1,0 +1,3 @@
+
+$ pixelparty -f rotate.glsl -t <anImage>
+
