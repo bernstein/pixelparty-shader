@@ -9,6 +9,12 @@ complexMult(in vec2 z0, in vec2 z1)
   return vec2(a,b);
 }
 
+vec2
+complexSquare(in vec2 z)
+{
+  return vec2(z.x*z.x-z.y*z.y,2.0*z.x*z.y);
+}
+
 float
 realPart(vec2 z)
 {
