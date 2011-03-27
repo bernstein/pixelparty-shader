@@ -6,7 +6,7 @@ uniform float time;
 uniform sampler2D tex0;
 uniform vec2 resolution;
 
-varying vec2 tc;
+smooth in vec2 tc;
 
 const float pi = 3.14159265358979323846264;
 
