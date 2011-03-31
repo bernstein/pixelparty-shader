@@ -28,9 +28,15 @@ imagPart(vec2 z)
 }
 
 float
-arg(vec2 z)
+arg(in vec2 z)
 {
   return atan(z.y,z.x);
+}
+
+vec2
+complexConjugate(in vec2 z)
+{
+  return vec2(z.x,-z.y);
 }
 
 vec2
@@ -55,8 +61,7 @@ mkPolar(in float r, in float phi)
 vec2
 complexInvert(in vec2 z)
 {
+  // return 1.0/(z.x^2 + z.y^2 ) * complexConjugate(z);
   float rinv = 1.0/length(z);
-  float phi = arg(z);
-  //return rinv * vec2(cos(-phi),sin(-phi));
-  return rinv * vec2(cos(phi),sin(phi));
+  return mkPolar(rinv, -arg(z));
 }
