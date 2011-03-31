@@ -51,3 +51,12 @@ mkPolar(in float r, in float phi)
 {
   return r*cis(phi);
 }
+
+vec2
+complexInvert(in vec2 z)
+{
+  float rinv = 1.0/length(z);
+  float phi = arg(z);
+  //return rinv * vec2(cos(-phi),sin(-phi));
+  return rinv * vec2(cos(phi),sin(phi));
+}
