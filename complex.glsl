@@ -1,6 +1,17 @@
 // -----------------------------------------------------------------------------
 // type complex = vec2
 
+vec2 complexMult(in vec2 z0, in vec2 z1);
+vec2 complexSquare(in vec2 z);
+vec2 complexConjugate(in vec2 z);
+vec2 complexInvert(in vec2 z);
+float realPart(in vec2 z);
+float imagPart(in vec2 z);
+float arg(in vec2 z);
+vec2 polar(in vec2 z);
+vec2 mkPolar(in float r, in float phi);
+vec2 cis(in float phi);
+
 vec2
 complexMult(in vec2 z0, in vec2 z1)
 {
@@ -16,13 +27,13 @@ complexSquare(in vec2 z)
 }
 
 float
-realPart(vec2 z)
+realPart(in vec2 z)
 {
   return z.x;
 }
 
 float
-imagPart(vec2 z)
+imagPart(in vec2 z)
 {
   return z.y;
 }
@@ -47,7 +58,7 @@ polar(in vec2 z)
 
 // e^ix = cos(x) + i*sin(x)
 vec2
-cis(float phi)
+cis(in float phi)
 {
   return vec2(cos(phi),sin(phi));
 }
