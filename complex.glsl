@@ -2,12 +2,14 @@
 // type complex = vec2
 
 vec2 complexMult(in vec2 z0, in vec2 z1);
+//vec2 complexDivide(in vec2 z0, in vec2 z1);
 vec2 complexSquare(in vec2 z);
 vec2 complexConjugate(in vec2 z);
 vec2 complexInvert(in vec2 z);
 float realPart(in vec2 z);
 float imagPart(in vec2 z);
 float arg(in vec2 z);
+float magnitude(in vec2 z);
 vec2 polar(in vec2 z);
 vec2 mkPolar(in float r, in float phi);
 vec2 cis(in float phi);
@@ -42,6 +44,12 @@ float
 arg(in vec2 z)
 {
   return atan(z.y,z.x);
+}
+
+float
+magnitude(in vec2 z)
+{
+  return length(z);
 }
 
 vec2
