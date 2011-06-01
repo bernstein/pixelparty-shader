@@ -1,4 +1,4 @@
-#version 130
+#version 330
 layout(location=0) in vec4 position;
 
 smooth out vec2 tc;
