@@ -1,7 +1,7 @@
 // infos:
 // http://en.wikipedia.org/wiki/Mandelbrot_set
 // http://www.ozone3d.net/tutorials/mandelbrot_set.php
-#version 130
+#version 330
 
 #include <hsv.glsl>
 #include <complex.glsl>
