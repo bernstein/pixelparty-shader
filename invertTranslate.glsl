@@ -8,6 +8,7 @@ uniform vec2 resolution;
 uniform sampler2D tex0;
 
 smooth in vec2 tc;
+out vec4 fragColor;
 
 const float pi = 3.14159265358979323846264;
 
@@ -22,5 +23,5 @@ main(void)
   vec3  col = texture2D(tex0, 0.25*z).rgb;
 
   float r2  = dot(tc,tc);
-  gl_FragColor = vec4(r2*col,1.0);
+  fragColor = vec4(r2*col,1.0);
 }

@@ -7,6 +7,7 @@ uniform sampler2D tex0;
 uniform vec2 resolution;
 
 smooth in vec2 tc;
+out vec4 fragColor;
 
 const float pi  = 3.14159265;
 const float tau = 6.28318531;
@@ -47,5 +48,5 @@ main(void)
   vec3 c =  texture2D(tex0,q).xyz;
 
   float r = magnitude(p);
-  gl_FragColor = vec4(c*r,1.0);
+  fragColor = vec4(c*r,1.0);
 }

@@ -8,6 +8,7 @@ uniform vec2 resolution;
 uniform sampler2D tex0;
 
 smooth in vec2 tc;
+out vec4 fragColor;
 
 const float pi = 3.14159265358979323846264;
 
@@ -19,5 +20,5 @@ main(void)
   vec2  p   = complexMult(cis(pi*s),tc); // rotate complex plane
   p         = complexInvert(p);          // invert
   vec4  col = texture2D(tex0, p);
-  gl_FragColor = col;
+  fragColor = col;
 }

@@ -11,6 +11,7 @@ uniform sampler2D tex0;
 uniform vec2 resolution;
 
 smooth in vec2 tc;
+out vec4 fragColor;
 
 const float pi = 3.14159265358979323846264;
 const float maxN  = 100;
@@ -58,5 +59,5 @@ main(void)
   vec2 p = s * tc - vec2(1.40,0.02);
   vec2 r = iterate(p);
 
-  gl_FragColor = colorize(r.x, r.y);
+  fragColor = colorize(r.x, r.y);
 }

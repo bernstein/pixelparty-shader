@@ -11,6 +11,7 @@ uniform float time;
 uniform vec2 resolution;
 
 smooth in vec2 tc;
+out vec4 fragColor;
 
 const float pi = 3.14159265358979323846264;
 const vec4 white = vec4(1.0,1.0,1.0,1.0);
@@ -158,5 +159,5 @@ main(void)
   vec4 col7 = byIm(wedgeAnnulus(0.25,7,p), p);
   col = col7;
 
-  gl_FragColor = col;
+  fragColor = col;
 }
