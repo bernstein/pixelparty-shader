@@ -1,6 +1,7 @@
 // infos:
 // http://en.wikipedia.org/wiki/Mandelbrot_set
 // http://www.ozone3d.net/tutorials/mandelbrot_set.php
+
 #version 330
 
 #include <hsv.glsl>
@@ -53,8 +54,7 @@ colorize(float n, float modSquared)
 void
 main(void)
 {
-  float T = time/1000.0;
-  float s = sin(T) + 1.0;
+  float s = sin(time) + 1.0;
 
   vec2 p = s * tc - vec2(1.40,0.02);
   vec2 r = iterate(p);
