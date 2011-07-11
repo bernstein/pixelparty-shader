@@ -48,6 +48,15 @@ barycentric(in vec2 p0, in vec2 p1, in vec2 p2, in vec2 p)
   return vec3(alpha, beta, gamma);
 }
 
+vec3
+barycentricWikipedia(in vec2 p0, in vec2 p1, in vec2 p2, in vec2 p)
+{
+  mat2 T = mat2(p0.x - p2.x, p0.y - p2.y, p1.x - p2.x, p1.y - p2.y);
+  vec2 l12 = inverse(T) * (p - p2);
+  float l3 = 1.0 - l12.x - l12.y;
+  return vec3(l12,l3);
+}
+
 bool
 triangle2(in vec2 A, in vec2 B, in vec2 C, in vec2 p)
 {
