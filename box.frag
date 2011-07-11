@@ -11,18 +11,22 @@ uniform sampler2D tex0;
 smooth in vec2    tc;
 out vec4          fragColor;
 
+const vec4 empty = vec4(0.0,0.0,0.0,0.0);
 const vec4 blue = vec4(0.0,0.0,1.0,1.0);
+const vec4 white = vec4(1.0,1.0,1.0,1.0);
 const vec4 yellow = vec4(1.0,1.0,0.0,1.0);
+const vec4 red = vec4(1.0,0.0,0.0,1.0);
 const float pi = 3.14159265358979323846264;
 
-struct triangle
+struct Triangle
 {
   vec4 A;
   vec4 B;
   vec4 C;
+  vec3 Normal;
 };
 
-void perspectiveDivide(inout triangle t);
+void perspectiveDivideTriangle(inout Triangle t);
 vec3 barycentric(in vec2 p0, in vec2 p1, in vec2 p2, in vec2 p);
 bool triangle2(in vec2 A, in vec2 B, in vec2 C, in vec2 p);
 
@@ -50,160 +54,188 @@ triangle2(in vec2 A, in vec2 B, in vec2 C, in vec2 p)
   return bc.x > 0 && bc.y > 0 && bc.z > 0;
 }
 
-vec4 byIm(in bool reg, in vec2 p)
+vec3
+saturate(in vec3 c)
 {
-  return reg ? blue : yellow;
+  return clamp(c,0.0,1.0);
+}
+
+vec4
+triangle2D(in Triangle t, in vec2 p)
+{
+  float s = sin(time);
+  float c = cos(time);
+  vec4 color = empty;
+
+  vec3 L = normalize(vec3(1.0,1.0,1.0));
+  vec3 V = normalize(vec3(-p.x,-p.y,1.0));
+  vec3 H = normalize(L + V);
+  float m = 1.0;
+
+  bool frontFacing = dot(V,t.Normal) > 0.0;
+  if (frontFacing && triangle2(t.A.xy, t.B.xy, t.C.xy, p)) {
+    vec4 ambient = 0.1*red;
+    vec4 diffuse = max(0.0,dot(t.Normal.xyz,L))*red * vec4(0.8,0.8,0.8,1.0);
+    vec4 specular = pow(dot(t.Normal, H),m)*red * vec4(0.7,0.7,0.7,1.0);
+    color = ambient + diffuse + specular;
+  }
+  return color;
 }
 
 void
-transformTriangle(in mat4 m, inout triangle t)
+transformTriangle(in mat4 mv, in mat4 proj, inout Triangle t)
 {
-  t.A *= m;
-  t.A /= t.A.w;
-  t.B *= m;
-  t.B /= t.B.w;
-  t.C *= m;
-  t.C /= t.C.w;
+  t.A = proj*mv*t.A;
+  t.B = proj*mv*t.B;
+  t.C = proj*mv*t.C;
+  t.Normal = normalize((transpose(inverse(mv)) * vec4(t.Normal,0.0)).xyz);
+  perspectiveDivideTriangle(t);
 }
 
 // clip space to normalized device coordinates (NDC)
 void
-perspectiveDivide(inout triangle t)
+perspectiveDivideTriangle(inout Triangle t)
 {
   t.A /= t.A.w;
   t.B /= t.B.w;
   t.C /= t.C.w;
 }
 
-const vec4 boxVertices[36] = vec4[36](
+Triangle boxTriangles[12]=Triangle[12](
   // back
-  vec4(-0.5,-0.5,-0.5,1.0),
-  vec4( 0.5,-0.5,-0.5,1.0),
-  vec4( 0.5, 0.5,-0.5,1.0),
-  vec4(-0.5,-0.5,-0.5,1.0),
-  vec4( 0.5, 0.5,-0.5,1.0),
-  vec4(-0.5, 0.5,-0.5,1.0),
-
+  Triangle( vec4(-0.5,-0.5,-0.5,1.0)
+           ,vec4( 0.5,-0.5,-0.5,1.0)
+           ,vec4( 0.5, 0.5,-0.5,1.0)
+           ,vec3(0.0,0.0,-1.0) //,0.0)
+           ),
+  Triangle( vec4(-0.5,-0.5,-0.5,1.0)
+           ,vec4( 0.5, 0.5,-0.5,1.0)
+           ,vec4(-0.5, 0.5,-0.5,1.0)
+           ,vec3(0.0,0.0,-1.0) //,0.0)
+           ),
   // front
-  vec4(-0.5,-0.5, 0.5,1.0),
-  vec4( 0.5,-0.5, 0.5,1.0),
-  vec4( 0.5, 0.5, 0.5,1.0),
-  vec4(-0.5,-0.5, 0.5,1.0),
-  vec4( 0.5, 0.5, 0.5,1.0),
-  vec4(-0.5, 0.5, 0.5,1.0),
-
-  // top
-  vec4(-0.5, 0.5, 0.5,1.0),
-  vec4(-0.5, 0.5,-0.5,1.0),
-  vec4( 0.5, 0.5,-0.5,1.0),
-  vec4(-0.5, 0.5, 0.5,1.0),
-  vec4( 0.5, 0.5,-0.5,1.0),
-  vec4( 0.5, 0.5, 0.5,1.0),
-
-  // bottom
-  vec4(-0.5,-0.5, 0.5,1.0),
-  vec4(-0.5,-0.5,-0.5,1.0),
-  vec4( 0.5,-0.5,-0.5,1.0),
-  vec4(-0.5,-0.5, 0.5,1.0),
-  vec4( 0.5,-0.5,-0.5,1.0),
-  vec4( 0.5,-0.5, 0.5,1.0),
-
-  // left
-  vec4(-0.5,-0.5,-0.5,1.0),
-  vec4(-0.5,-0.5, 0.5,1.0),
-  vec4(-0.5, 0.5, 0.5,1.0),
-  vec4(-0.5,-0.5,-0.5,1.0),
-  vec4(-0.5, 0.5, 0.5,1.0),
-  vec4(-0.5, 0.5,-0.5,1.0),
-
-  // right
-  vec4( 0.5,-0.5,-0.5,1.0),
-  vec4( 0.5,-0.5, 0.5,1.0),
-  vec4( 0.5, 0.5, 0.5,1.0),
-  vec4( 0.5,-0.5,-0.5,1.0),
-  vec4( 0.5, 0.5, 0.5,1.0),
-  vec4( 0.5, 0.5,-0.5,1.0)
-  );
-
-triangle boxTriangles[12]=triangle[12](
-  // back
-  triangle( vec4(-0.5,-0.5,-0.5,1.0),
-            vec4( 0.5,-0.5,-0.5,1.0),
-            vec4( 0.5, 0.5,-0.5,1.0)),
-  triangle( vec4(-0.5,-0.5,-0.5,1.0),
-  // front
-            vec4( 0.5, 0.5,-0.5,1.0),
-            vec4(-0.5, 0.5,-0.5,1.0)),
-  triangle( vec4(-0.5,-0.5, 0.5,1.0),
-            vec4( 0.5,-0.5, 0.5,1.0),
-            vec4( 0.5, 0.5, 0.5,1.0)),
-  triangle( vec4(-0.5,-0.5, 0.5,1.0),
-            vec4( 0.5, 0.5, 0.5,1.0),
-            vec4(-0.5, 0.5, 0.5,1.0)),
+  Triangle( vec4(-0.5,-0.5, 0.5,1.0)
+          , vec4( 0.5, 0.5, 0.5,1.0)
+          , vec4( 0.5,-0.5, 0.5,1.0)
+           ,vec3(0.0,0.0,1.0) //,0.0)
+            ),
+  Triangle( vec4(-0.5,-0.5, 0.5,1.0)
+          , vec4(-0.5, 0.5, 0.5,1.0)
+          , vec4( 0.5, 0.5, 0.5,1.0)
+           ,vec3(0.0,0.0,1.0) //,0.0)
+            ),
   //top
-  triangle( vec4(-0.5, 0.5, 0.5,1.0),
+  Triangle( vec4(-0.5, 0.5, 0.5,1.0),
             vec4(-0.5, 0.5,-0.5,1.0),
-            vec4( 0.5, 0.5,-0.5,1.0)),
-  triangle( vec4(-0.5, 0.5, 0.5,1.0),
+            vec4( 0.5, 0.5,-0.5,1.0)
+          , vec3( 0.0, 1.0, 0.0) //,0.0)
+            ),
+  Triangle( vec4(-0.5, 0.5, 0.5,1.0),
             vec4( 0.5, 0.5,-0.5,1.0),
-            vec4( 0.5, 0.5, 0.5,1.0)),
+            vec4( 0.5, 0.5, 0.5,1.0)
+          , vec3( 0.0, 1.0, 0.0) //,0.0)
+            ),
   //bottom
-  triangle( vec4(-0.5,-0.5, 0.5,1.0),
-            vec4(-0.5,-0.5,-0.5,1.0),
-            vec4( 0.5,-0.5,-0.5,1.0)),
-  triangle( vec4(-0.5,-0.5, 0.5,1.0),
-            vec4( 0.5,-0.5,-0.5,1.0),
-            vec4( 0.5,-0.5, 0.5,1.0)),
+  Triangle( vec4(-0.5,-0.5, 0.5,1.0)
+          , vec4(-0.5,-0.5,-0.5,1.0)
+          , vec4( 0.5,-0.5,-0.5,1.0)
+          , vec3(0.0,-1.0,0.0) //,0.0)
+            ),
+  Triangle( vec4(-0.5,-0.5, 0.5,1.0)
+          , vec4( 0.5,-0.5,-0.5,1.0)
+          , vec4( 0.5,-0.5, 0.5,1.0)
+          , vec3(0.0,-1.0,0.0) //,0.0)
+            ),
   // left
-  triangle( vec4(-0.5,-0.5,-0.5,1.0),
-            vec4(-0.5,-0.5, 0.5,1.0),
-            vec4(-0.5, 0.5, 0.5,1.0)),
-  triangle( vec4(-0.5,-0.5,-0.5,1.0),
-            vec4(-0.5, 0.5, 0.5,1.0),
-            vec4(-0.5, 0.5,-0.5,1.0)),
+  Triangle( vec4(-0.5,-0.5,-0.5,1.0)
+          , vec4(-0.5, 0.5, 0.5,1.0)
+          , vec4(-0.5,-0.5, 0.5,1.0)
+          , vec3(-1.0,0.0,0.0) //,0.0)
+          ),
+  Triangle( vec4(-0.5,-0.5,-0.5,1.0)
+          , vec4(-0.5, 0.5,-0.5,1.0)
+          , vec4(-0.5, 0.5, 0.5,1.0)
+          , vec3(-1.0,0.0,0.0) //,0.0)
+          ),
   // right
-  triangle( vec4( 0.5,-0.5,-0.5,1.0),
-            vec4( 0.5,-0.5, 0.5,1.0),
-            vec4( 0.5, 0.5, 0.5,1.0)),
-  triangle( vec4( 0.5,-0.5,-0.5,1.0),
-            vec4( 0.5, 0.5, 0.5,1.0),
-            vec4( 0.5, 0.5,-0.5,1.0)));
+  Triangle( vec4( 0.5,-0.5,-0.5,1.0)
+          , vec4( 0.5,-0.5, 0.5,1.0)
+          , vec4( 0.5, 0.5, 0.5,1.0)
+          , vec3( 1.0,0.0,0.0) //,0.0)
+          ),
+  Triangle( vec4( 0.5,-0.5,-0.5,1.0)
+          , vec4( 0.5, 0.5, 0.5,1.0)
+          , vec4( 0.5, 0.5,-0.5,1.0)
+          , vec3( 1.0,0.0,0.0) //,0.0)
+          ));
 
-void main(void)
+vec4
+drawFlatBox(in mat4 mv, in mat4 proj, in vec2 p)
+{
+  transformTriangle(mv, proj, boxTriangles[0]);
+  transformTriangle(mv, proj, boxTriangles[1]);
+  transformTriangle(mv, proj, boxTriangles[2]);
+  transformTriangle(mv, proj, boxTriangles[3]);
+  transformTriangle(mv, proj, boxTriangles[4]);
+  transformTriangle(mv, proj, boxTriangles[5]);
+  transformTriangle(mv, proj, boxTriangles[6]);
+  transformTriangle(mv, proj, boxTriangles[7]);
+  transformTriangle(mv, proj, boxTriangles[8]);
+  transformTriangle(mv, proj, boxTriangles[9]);
+  transformTriangle(mv, proj, boxTriangles[10]);
+  transformTriangle(mv, proj, boxTriangles[11]);
+
+  vec4 color = empty;
+  // back
+  color += triangle2D(boxTriangles[0],p);
+  color += triangle2D(boxTriangles[1],p);
+  // front
+  color += triangle2D(boxTriangles[2],p);
+  color += triangle2D(boxTriangles[3],p);
+
+  color += triangle2D(boxTriangles[4],p);
+  color += triangle2D(boxTriangles[5],p);
+  color += triangle2D(boxTriangles[6],p);
+  color += triangle2D(boxTriangles[7],p);
+
+  color += triangle2D(boxTriangles[8],p);
+  color += triangle2D(boxTriangles[9],p);
+  color += triangle2D(boxTriangles[10],p);
+  color += triangle2D(boxTriangles[11],p);
+
+  if (color == empty) {
+    color = vec4(p.x,p.y,0.2,1.0)*white;
+  }
+
+  return color;
+}
+
+vec2
+tunnel(in vec2 p, in float move, in float scaleR, in float scalePhi)
+{
+  // Invert r
+  // Scale phi 
+  // Scale r
+  // Add move to r
+  return vec2(move + scaleR/magnitude(p), scalePhi*arg(p));
+}
+
+void 
+main(void)
 {
   float s = sin(time) * 1.5 + 0.5;
-  vec2 p = mod(cos(tc.y)*tc,0.2)-vec2(0.1);
+  vec2 p = tc;
+  p = complexMult(cis(s), p);
+  p = mod(cos(s*p.y)*p,0.2)-vec2(0.1);
 
-  mat4 projection = perspective(45.0, 1.0, 1.0, 100.0);
-  mat4 translate = make_translate(vec3(0.0, 0.0, 20.0));
-  mat4 mvp = rotZ(4.0*time)*rotX(time) * translate * projection;
+  float scaleR = 1.0; //0.1;
+  float scalePhi = 1.5/pi;
+  //p = tunnel(p, 0.75*time, scaleR, scalePhi);
 
-  transformTriangle(mvp, boxTriangles[0]);
-  transformTriangle(mvp, boxTriangles[1]);
-  transformTriangle(mvp, boxTriangles[2]);
-  transformTriangle(mvp, boxTriangles[3]);
-  transformTriangle(mvp, boxTriangles[4]);
-  transformTriangle(mvp, boxTriangles[5]);
-  transformTriangle(mvp, boxTriangles[6]);
-  transformTriangle(mvp, boxTriangles[7]);
-  transformTriangle(mvp, boxTriangles[8]);
-  transformTriangle(mvp, boxTriangles[9]);
-  transformTriangle(mvp, boxTriangles[10]);
-  transformTriangle(mvp, boxTriangles[11]);
+  mat4 projection = perspective(90.0, 1.0, 1.0, 100.0);
+  mat4 translate = make_translate(vec3(0.0, 0.0, -10.0));
+  mat4 mv = translate * rotY(5*time)*rotX(pi/4)*rotZ(pi/4);
 
-  fragColor = byIm(
-       triangle2(boxTriangles[0].A.xy,boxTriangles[0].B.xy,boxTriangles[0].C.xy,p)
-    || triangle2(boxTriangles[1].A.xy,boxTriangles[1].B.xy,boxTriangles[1].C.xy,p)
-    || triangle2(boxTriangles[2].A.xy,boxTriangles[2].B.xy,boxTriangles[2].C.xy,p)
-    || triangle2(boxTriangles[3].A.xy,boxTriangles[3].B.xy,boxTriangles[3].C.xy,p)
-    || triangle2(boxTriangles[4].A.xy,boxTriangles[4].B.xy,boxTriangles[4].C.xy,p)
-    || triangle2(boxTriangles[5].A.xy,boxTriangles[5].B.xy,boxTriangles[5].C.xy,p)
-    || triangle2(boxTriangles[6].A.xy,boxTriangles[6].B.xy,boxTriangles[6].C.xy,p)
-    || triangle2(boxTriangles[7].A.xy,boxTriangles[7].B.xy,boxTriangles[7].C.xy,p)
-    || triangle2(boxTriangles[8].A.xy,boxTriangles[8].B.xy,boxTriangles[8].C.xy,p)
-    || triangle2(boxTriangles[9].A.xy,boxTriangles[9].B.xy,boxTriangles[9].C.xy,p)
-    || triangle2(boxTriangles[10].A.xy,boxTriangles[10].B.xy,boxTriangles[10].C.xy,p)
-    || triangle2(boxTriangles[11].A.xy,boxTriangles[11].B.xy,boxTriangles[11].C.xy,p)
-    , p);
+  fragColor = drawFlatBox(mv,projection, p);
 }
 
