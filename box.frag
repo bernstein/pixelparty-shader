@@ -80,13 +80,14 @@ triangle2D(in Triangle t, in vec2 p)
   vec3 L = normalize(vec3(1.0,1.0,1.0));
   vec3 V = normalize(vec3(-p.x,-p.y,1.0));
   vec3 H = normalize(L + V);
+  vec3 N = t.Normal;
   float m = 1.0;
 
-  bool frontFacing = dot(V,t.Normal) > 0.0;
+  bool frontFacing = dot(V,N) > 0.0;
   if (frontFacing && triangle2(t.A.xy, t.B.xy, t.C.xy, p)) {
     vec4 ambient = 0.1*red;
-    vec4 diffuse = max(0.0,dot(t.Normal.xyz,L))*red * vec4(0.8,0.8,0.8,1.0);
-    vec4 specular = pow(dot(t.Normal, H),m)*red * vec4(0.7,0.7,0.7,1.0);
+    vec4 diffuse = max(0.0,dot(N,L))*red * vec4(0.8,0.8,0.8,1.0);
+    vec4 specular = pow(dot(N,H),m)*red * vec4(0.7,0.7,0.7,1.0);
     color = ambient + diffuse + specular;
   }
   return color;
