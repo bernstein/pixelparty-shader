@@ -16,6 +16,7 @@ const vec4 blue = vec4(0.0,0.0,1.0,1.0);
 const vec4 white = vec4(1.0,1.0,1.0,1.0);
 const vec4 yellow = vec4(1.0,1.0,0.0,1.0);
 const vec4 red = vec4(1.0,0.0,0.0,1.0);
+const vec4 grey = vec4(0.4,0.4,0.4,1.0);
 const float pi = 3.14159265358979323846264;
 
 struct Triangle
