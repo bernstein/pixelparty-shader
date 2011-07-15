@@ -76,8 +76,7 @@ from_symmetric_frustum(in float l, in float b, in float n, in float f)
 mat4 
 perspective(in float fov, in float aspect, in float n, in float f)
 {
-  float deg2rad = 0.0174532925;
-  float t = tan(0.5*fov*deg2rad);
+  float t = tan(0.5*radians(fov));
   float h = n * t;
   float w = h * aspect;
 
