@@ -71,14 +71,13 @@ saturate(in vec3 c)
 }
 
 vec4
-triangle2D(in Triangle t, in vec2 p)
+triangle2D(in Triangle t, in vec3 V, in vec2 p)
 {
   float s = sin(time);
   float c = cos(time);
   vec4 color = empty;
 
   vec3 L = normalize(vec3(1.0,1.0,1.0));
-  vec3 V = normalize(vec3(-p.x,-p.y,1.0));
   vec3 H = normalize(L + V);
   vec3 N = t.Normal;
 
@@ -86,8 +85,9 @@ triangle2D(in Triangle t, in vec2 p)
   if (frontFacing && triangle2(t.A.xy, t.B.xy, t.C.xy, p)) {
     vec4 ambient = 0.1*red;
     vec4 diffuse = max(0.0,dot(N,L))*red * vec4(0.8,0.8,0.8,1.0);
-    float m = 1.0;
-    vec4 specular = pow(dot(N,H),m)*red * vec4(0.7,0.7,0.7,1.0);
+    float m = 2.0;
+    float s = max(dot(N,H),0.0);
+    vec4 specular = pow(s,m) * red * vec4(0.7,0.7,0.7,1.0);
     color = ambient + diffuse + specular;
   }
   return color;
@@ -180,42 +180,55 @@ Triangle boxTriangles[12]=Triangle[12](
           , vec3( 1.0,0.0,0.0) //,0.0)
           ));
 
+
 vec4
 drawFlatBox(in mat4 mv, in mat4 proj, in vec2 p)
 {
-  transformTriangle(mv, proj, boxTriangles[0]);
-  transformTriangle(mv, proj, boxTriangles[1]);
-  transformTriangle(mv, proj, boxTriangles[2]);
-  transformTriangle(mv, proj, boxTriangles[3]);
-  transformTriangle(mv, proj, boxTriangles[4]);
-  transformTriangle(mv, proj, boxTriangles[5]);
-  transformTriangle(mv, proj, boxTriangles[6]);
-  transformTriangle(mv, proj, boxTriangles[7]);
-  transformTriangle(mv, proj, boxTriangles[8]);
-  transformTriangle(mv, proj, boxTriangles[9]);
-  transformTriangle(mv, proj, boxTriangles[10]);
-  transformTriangle(mv, proj, boxTriangles[11]);
-
   vec4 color = empty;
-  // back
-  color += triangle2D(boxTriangles[0],p);
-  color += triangle2D(boxTriangles[1],p);
-  // front
-  color += triangle2D(boxTriangles[2],p);
-  color += triangle2D(boxTriangles[3],p);
+  vec3 V = normalize(vec3(-p.x,-p.y,1.0));
 
-  color += triangle2D(boxTriangles[4],p);
-  color += triangle2D(boxTriangles[5],p);
-  color += triangle2D(boxTriangles[6],p);
-  color += triangle2D(boxTriangles[7],p);
+  vec4 center = proj*mv*vec4( 0.0, 0.0, 0.0, 1.0);
+  center /= center.w;
+  vec4 rVec = proj*mv*vec4( 0.5, 0.5, 0.5, 1.0);
+  rVec /= rVec.w;
 
-  color += triangle2D(boxTriangles[8],p);
-  color += triangle2D(boxTriangles[9],p);
-  color += triangle2D(boxTriangles[10],p);
-  color += triangle2D(boxTriangles[11],p);
+  if (distance(p,center.xy)<distance(center.xyz,rVec.xyz)) {
 
-  if (color == empty) {
-    color = vec4(p.x,p.y,0.2,1.0)*white;
+    transformTriangle(mv, proj, boxTriangles[0]);
+    transformTriangle(mv, proj, boxTriangles[1]);
+    transformTriangle(mv, proj, boxTriangles[2]);
+    transformTriangle(mv, proj, boxTriangles[3]);
+    transformTriangle(mv, proj, boxTriangles[4]);
+    transformTriangle(mv, proj, boxTriangles[5]);
+    transformTriangle(mv, proj, boxTriangles[6]);
+    transformTriangle(mv, proj, boxTriangles[7]);
+    transformTriangle(mv, proj, boxTriangles[8]);
+    transformTriangle(mv, proj, boxTriangles[9]);
+    transformTriangle(mv, proj, boxTriangles[10]);
+    transformTriangle(mv, proj, boxTriangles[11]);
+
+    // back
+    color += triangle2D(boxTriangles[0],V,p);
+    color += triangle2D(boxTriangles[1],V,p);
+    // front
+    color += triangle2D(boxTriangles[2],V,p);
+    color += triangle2D(boxTriangles[3],V,p);
+
+    color += triangle2D(boxTriangles[4],V,p);
+    color += triangle2D(boxTriangles[5],V,p);
+
+    color += triangle2D(boxTriangles[6],V,p);
+    color += triangle2D(boxTriangles[7],V,p);
+
+    color += triangle2D(boxTriangles[8],V,p);
+    color += triangle2D(boxTriangles[9],V,p);
+
+    color += triangle2D(boxTriangles[10],V,p);
+    color += triangle2D(boxTriangles[11],V,p);
+
+    if (color == empty) {
+      color = vec4(p.x,p.y,0.2,1.0)*white;
+    }
   }
 
   return color;
@@ -224,10 +237,6 @@ drawFlatBox(in mat4 mv, in mat4 proj, in vec2 p)
 vec2
 tunnel(in vec2 p, in float move, in float scaleR, in float scalePhi)
 {
-  // Invert r
-  // Scale phi 
-  // Scale r
-  // Add move to r
   return vec2(move + scaleR/magnitude(p), scalePhi*arg(p));
 }
 
