@@ -11,7 +11,7 @@ void
 main(void)
 {
   vec2 z = tc;
-  vec3 col = hsvToRgb(vec3(argTesting(z)/(2.0*pi), 0.7, magnitude(z)));
+  vec3 col = hsvToRgb(vec3(arg(z)/(2.0*pi), 0.7, magnitude(z)));
   fragColor = vec4(col, 1.0);
 }
 
