@@ -53,18 +53,21 @@ hsvToRgb(in vec3 hsv)
   vec3 rgb = vec3(hsv.z);
   if ( hsv.y != 0.0 ) {
     float var_h = hsv.x * 6.0;
-    float var_i = floor(var_h);   // Or ... var_i = floor( var_h )
-    float var_1 = hsv.z * (1.0 - hsv.y);
-    float var_2 = hsv.z * (1.0 - hsv.y * (var_h-var_i));
-    float var_3 = hsv.z * (1.0 - hsv.y * (1.0 - (var_h-var_i)));
+    float h_i = floor(var_h);
+    //float f = var_h - h_i;
+    float p = hsv.z * (1.0 - hsv.y);
+    float q = hsv.z * (1.0 - hsv.y * (var_h-h_i));
+    float t = hsv.z * (1.0 - hsv.y * (1.0 - (var_h-h_i)));
 
-    switch (int(var_i)) {
-      case  0: rgb = vec3(hsv.z, var_3, var_1); break;
-      case  1: rgb = vec3(var_2, hsv.z, var_1); break;
-      case  2: rgb = vec3(var_1, hsv.z, var_3); break;
-      case  3: rgb = vec3(var_1, var_2, hsv.z); break;
-      case  4: rgb = vec3(var_3, var_1, hsv.z); break;
-      default: rgb = vec3(hsv.z, var_1, var_2); break;
+    int i = int(h_i) % 6;
+
+    switch (i) {
+      case  0: rgb = vec3(hsv.z, t, p); break;
+      case  1: rgb = vec3(q, hsv.z, p); break;
+      case  2: rgb = vec3(p, hsv.z, t); break;
+      case  3: rgb = vec3(p, q, hsv.z); break;
+      case  4: rgb = vec3(t, p, hsv.z); break;
+      default: rgb = vec3(hsv.z, p, q); break;
     }
   }
   return rgb;
