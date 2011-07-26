@@ -13,6 +13,7 @@ float magnitude(in vec2 z);
 vec2 polar(in vec2 z);
 vec2 mkPolar(in float r, in float phi);
 vec2 cis(in float phi);
+vec2 complexLog(in vec2 z);
 
 vec2
 complexMult(in vec2 z0, in vec2 z1)
@@ -83,4 +84,10 @@ complexInvert(in vec2 z)
   // return 1.0/(z.x^2 + z.y^2 ) * complexConjugate(z);
   float rinv = 1.0/length(z);
   return mkPolar(rinv, -arg(z));
+}
+
+vec2 
+complexLog(in vec2 z)
+{
+  return vec2(log(magnitude(z)),arg(z));
 }
