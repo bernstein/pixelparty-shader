@@ -14,6 +14,7 @@ vec2 polar(in vec2 z);
 vec2 mkPolar(in float r, in float phi);
 vec2 cis(in float phi);
 vec2 complexLog(in vec2 z);
+vec2 complexExp(in vec2 z);
 
 vec2
 complexMult(in vec2 z0, in vec2 z1)
@@ -90,4 +91,10 @@ vec2
 complexLog(in vec2 z)
 {
   return vec2(log(magnitude(z)),arg(z));
+}
+
+vec2 
+complexExp(in vec2 z)
+{
+  return exp(z.x)*vec2(cos(z.y), sin(z.y));
 }
