@@ -54,10 +54,10 @@ hsvToRgb(in vec3 hsv)
   if ( hsv.y != 0.0 ) {
     float var_h = hsv.x * 6.0;
     float h_i = floor(var_h);
-    //float f = var_h - h_i;
+    float f = var_h - h_i;
     float p = hsv.z * (1.0 - hsv.y);
-    float q = hsv.z * (1.0 - hsv.y * (var_h-h_i));
-    float t = hsv.z * (1.0 - hsv.y * (1.0 - (var_h-h_i)));
+    float q = hsv.z * (1.0 - hsv.y * f);
+    float t = hsv.z * (1.0 - hsv.y * (1.0 - f));
 
     int i = int(h_i) % 6;
 
