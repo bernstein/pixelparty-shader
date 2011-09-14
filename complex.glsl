@@ -93,8 +93,23 @@ complexLog(in vec2 z)
   return vec2(log(magnitude(z)),arg(z));
 }
 
+// exp(a+ib) = exp(a)*e^(ib)
 vec2 
 complexExp(in vec2 z)
 {
+  // exp(z.x)*cis(z.y); ==
   return exp(z.x)*vec2(cos(z.y), sin(z.y));
 }
+
+vec2
+complexSin(in vec2 z)
+{
+  return vec2(sin(z.x)*cosh(z.y), cos(z.x)*sinh(z.y));
+}
+
+vec2
+complexCos(in vec2 z)
+{
+  return vec2(cos(z.x)*cosh(z.y), -sin(z.x)*sinh(z.y));
+}
+
