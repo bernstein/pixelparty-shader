@@ -98,10 +98,30 @@ sharp(in sampler2D tex, in vec2 t)
   return sum;
 }
 
+vec4
+sobel(in sampler2D tex, in vec2 t)
+{
+  float G_x[9]=float[9]( -1.0,-2.0,-1.0,
+                          0.0,0.0,0.0,
+                          1.0,2.0,1.0);
+  float G_y[9]=float[9]( -1.0,0.0,1.0,
+                         -2.0,0.0,2.0,
+                         -1.0,0.0,1.0);
+  vec4 sumGx = vec4(0.0);
+  for (int i=0; i<9; ++i) {
+    sumGx += texture(tex,t+offset[i]) * G_x[i];
+  }
+  vec4 sumGy = vec4(0.0);
+  for (int i=0; i<9; ++i) {
+    sumGy += texture(tex,t+offset[i]) * G_y[i];
+  }
+  return sqrt(sumGx*sumGx + sumGy*sumGy);
+}
+
 void
 main(void)
 {
   vec2 p = 0.5 * vec2(1.0,-1.0) * tc + 0.5;
-  fragColor = emboss(tex0,p);
+  fragColor = sobel(tex0,p);
 }
 
