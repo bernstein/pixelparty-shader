@@ -43,7 +43,7 @@ PointLight gPointLight = PointLight(vec3(5.0,5.0,-2.0),
                                     vec4(0.1,0.1,0.1,1.0), 
                                     vec4(0.8,0.8,0.8,1.0));
 
-Sphere gSphere = Sphere(vec3(0.0, sin(time), -6.0),1.0);
+Sphere gSphere  = Sphere(vec3(0.0, sin(time), -6.0),1.0);
 Sphere gSphere2 = Sphere(vec3(3.0, sin(time), -16.0),1.0);
 Material gMaterial = Material(vec4(0.2,0.2,0.2,1.0)
                             , vec4(0.8,0.0,0.0,1.0)
@@ -76,8 +76,7 @@ vec3
 calcNormal(in Sphere s, in Ray r, in float t)
 {
   vec3 P = r.o + t*r.d;
-  vec3 N = normalize(P - s.center);
-  return N; 
+  return normalize(P - s.center);
 }
 
 Ray eyeRay(vec2 p)
