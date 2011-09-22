@@ -39,20 +39,35 @@ struct Material
   float m;
 };
 
-PointLight gPointLight = PointLight(vec3(5.0,5.0,-2.0),
-                                    vec4(0.1,0.1,0.1,1.0), 
+PointLight gPointLight = PointLight(vec3(5*sin(2.5*time),5.0,5*cos(2.5*time)-5.0),
+                                    vec4(0.2,0.2,0.2,1.0), 
                                     vec4(0.8,0.8,0.8,1.0));
 
-Sphere gSphere  = Sphere(vec3(0.0, sin(time), -6.0),1.0);
-Sphere gSphere2 = Sphere(vec3(3.0, sin(time), -16.0),1.0);
-Material gMaterial = Material(vec4(0.2,0.2,0.2,1.0)
-                            , vec4(0.8,0.0,0.0,1.0)
-                            , vec4(0.8,0.8,0.8,1.0)
-                            , 20.0);
-Material gMaterial2 = Material(vec4(0.3,0.3,0.3,1.0)
-                            , vec4(0.2,0.2,0.8,1.0)
-                            , vec4(0.5,0.5,0.5,1.0)
-                            , 50.0);
+Sphere spheres[4] = Sphere[4](
+  Sphere(vec3(+0.0, sin(time)-2.0, -6.0),1.0),
+  Sphere(vec3(+4.0, -2.0, -16.0),1.0),
+  Sphere(vec3(-2.0, -2.0, -10.0),1.0),
+  Sphere(vec3(-1.0, -1.0, -20.0),1.5)
+  );
+
+Material materials[4] = Material[4](
+  Material(vec4(0.2,0.2,0.2,1.0)
+                          , vec4(0.8,0.0,0.0,1.0)
+                          , vec4(0.8,0.8,0.8,1.0)
+                          , 20.0),
+  Material(vec4(0.3,0.3,0.3,1.0)
+                          , vec4(0.2,0.2,0.8,1.0)
+                          , vec4(0.5,0.5,0.5,1.0)
+                          , 50.0),
+  Material(vec4(0.3,0.3,0.3,1.0)
+                          , vec4(0.2,0.8,0.2,1.0)
+                          , vec4(0.5,0.5,0.5,1.0)
+                          , 50.0),
+  Material(vec4(0.3,0.3,0.3,1.0)
+                          , vec4(0.8,0.8,0.2,1.0)
+                          , vec4(0.5,0.5,0.5,1.0)
+                          , 50.0)
+  );
 
 float
 degToRad(in float a)
@@ -73,9 +88,8 @@ intersect(in Sphere s, in Ray r, out float t)
 }
 
 vec3
-calcNormal(in Sphere s, in Ray r, in float t)
+calcNormal(in Sphere s, in vec3 P)
 {
-  vec3 P = r.o + t*r.d;
   return normalize(P - s.center);
 }
 
@@ -98,40 +112,76 @@ background()
 }
 
 vec4
-shade(in Sphere sphere, in Ray r, in float t, in Material material)
+shade(in vec3 P, in vec3 N, in vec3 V, in Material material)
 {
-  vec3 N = calcNormal(sphere,r,t);
-  vec3 P = r.o + t*r.d;
-  vec3 L = normalize(gPointLight.location - P);
-  vec3 V = -r.d;
-  vec3 H = normalize(L + V);
-
   vec4 ambient = gPointLight.ambient * material.ka;
+
+  vec3 L = normalize(gPointLight.location - P);
+  vec3 H = normalize(L + V);
   vec4 diffuse = gPointLight.color * material.kd * max(0.0, dot(N,L));
   float s = max(dot(N,H),0.0);
   vec4 specular = pow(s,material.m) * material.ks * gPointLight.color;
+
   return ambient + diffuse + specular;
 }
 
 vec4
-raytrace(Ray r,int depth)
+trace(Ray r,out Ray refl)
 {
-  float t0=-1.0;
-  if (intersect(gSphere, r, t0)) {
-    return shade(gSphere, r, t0, gMaterial);
+  refl = r;
+  float tmin=1000;
+  float t=1000;
+  vec4 color = background();
+  bool h = false;
+  Sphere k = spheres[0];
+  Material mat = materials[0];
+
+  h = intersect(spheres[0], r, t);
+  if (h && t<tmin) {
+    tmin=t;
+    mat = materials[0];
+    k = spheres[0];
   }
-  if (intersect(gSphere2, r, t0)) {
-    return shade(gSphere2, r, t0, gMaterial2);
-  } else {
-    return background();
+  h = intersect(spheres[1], r, t);
+  if (h && t<tmin) {
+    tmin=t;
+    mat = materials[1];
+    k = spheres[1];
   }
+  h = intersect(spheres[2], r, t);
+  if (h && t<tmin) {
+    tmin=t;
+    mat = materials[2];
+    k = spheres[2];
+  }
+  h = intersect(spheres[3], r, t);
+  if (h && t<tmin) {
+    tmin=t;
+    mat = materials[3];
+    k = spheres[3];
+  }
+
+  if (tmin < 1000.0) {
+    vec3 P = r.o + tmin*r.d;
+    vec3 N = calcNormal(k,P);
+    vec3 V = -r.d;
+    color = shade(P, N, V, mat);
+    refl = Ray(P,reflect(V,N));
+  }
+
+  return color;
 }
 
 void 
 main(void)
 {
+  vec4 color = empty;
   Ray r = eyeRay(gl_FragCoord.xy);
-  int depth=2;
-  vec4 clr = raytrace(r, depth);
-  fragColor = clr;
+  Ray refl;
+  color += trace(r,refl);
+  Ray refl2;
+  color = color + 0.1*trace(refl,refl2);
+  //Ray refl3;
+  //color = color + 0.3*trace(refl2,refl3);
+  fragColor = color;
 }
