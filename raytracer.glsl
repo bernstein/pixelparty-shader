@@ -47,14 +47,14 @@ PointLight gPointLight = PointLight(vec3(5*sin(2.5),5.0,5*cos(2.5)-5.0),
                                     vec4(0.8,0.8,0.8,1.0));
 
 Sphere spheres[4] = Sphere[4](
-  Sphere(vec3( 0.0, -1e5-1, -100.0),1e5), // Bottom
+  Sphere(vec3( 0.0, -1e5-1, -10.0),1e5), // Bottom
   Sphere(vec3(3*sin(time), 0.0, -10.0+3*cos(time)),1.0),
   Sphere(vec3(3*sin(time+pi), 0.0, -10.0+3*cos(time+pi)),1.0),
   Sphere(vec3(+0.0, sin(time)+1.0, -10.0),1.0) // yellow sphere
   );
 
 Material materials[4] = Material[4](
-  Material(vec4(0.3,0.3,0.3,1.0)
+  Material(vec4(0.8,0.8,0.8,1.0)
         , vec4(0.75,0.75,0.75,1.0)
         , vec4(0.5,0.5,0.5,1.0)
         , 50.0),
@@ -197,7 +197,7 @@ main(void)
   color += trace(r,refl);
   Ray refl2;
   color = color + 0.1*trace(refl,refl2);
-  //Ray refl3;
-  //color = color + 0.3*trace(refl2,refl3);
+  Ray refl3;
+  color = color + 0.05*trace(refl2,refl3);
   fragColor = color;
 }
