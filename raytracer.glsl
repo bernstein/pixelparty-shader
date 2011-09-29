@@ -83,7 +83,7 @@ intersect(in Sphere s, in Ray r, out float t)
   float b = 2.0*dot(r.o - s.center, r.d);
   float c = dot(r.o - s.center, r.o - s.center) - s.r*s.r;
   float discriminant = b*b - 4*a*c;
-  t = (-b - discriminant)/ 2*a; //t2 = (-b + discriminant)/ 2*a;
+  t = (-b - sqrt(discriminant))/ 2*a; //t2 = (-b + discriminant)/ 2*a;
   return (discriminant > 0.0);
 }
 
